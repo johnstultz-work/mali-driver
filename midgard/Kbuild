@@ -61,7 +61,9 @@ DEFINES = \
 	-DMALI_MOCK_TEST=$(MALI_MOCK_TEST) \
 	-DMALI_COVERAGE=$(MALI_COVERAGE) \
 	-DMALI_RELEASE_NAME=\"$(MALI_RELEASE_NAME)\" \
-	-DMALI_GCC_WORKAROUND_MIDCOM_4598=$(MALI_GCC_WORKAROUND_MIDCOM_4598)
+	-DMALI_GCC_WORKAROUND_MIDCOM_4598=$(MALI_GCC_WORKAROUND_MIDCOM_4598) \
+	-DCONFIG_MALI_PWRSOFT_765=y \
+	-DCONFIG_MALI_DEVFREQ=y
 
 ifeq ($(KBUILD_EXTMOD),)
 # in-tree
@@ -150,6 +152,7 @@ include $(src)/$(MALI_PLATFORM_DIR)/Kbuild
 
 ifeq ($(CONFIG_MALI_DEVFREQ),y)
   ifeq ($(CONFIG_DEVFREQ_THERMAL),y)
+    ccflags-y += -I$(src)/ipa
     include $(src)/ipa/Kbuild
   endif
 endif
@@ -178,4 +181,4 @@ ccflags-y += -I$(src)/backend/gpu
 subdir-ccflags-y += -I$(src)/backend/gpu
 
 # For kutf and mali_kutf_irq_latency_test
-obj-$(CONFIG_MALI_KUTF) += tests/
+#obj-$(CONFIG_MALI_KUTF) += tests/

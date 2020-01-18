@@ -19,13 +19,22 @@
 #
 #
 
-
-KDIR ?= /lib/modules/$(shell uname -r)/build
+KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
 
 BUSLOG_PATH_RELATIVE = $(CURDIR)/../../../..
 UMP_PATH_RELATIVE = $(CURDIR)/../../../base/ump
 KBASE_PATH_RELATIVE = $(CURDIR)
 EXTRA_SYMBOLS = $(UMP_PATH_RELATIVE)/src/Module.symvers
+
+
+#By default build for CLD
+KBUILD_OPTIONS += CONFIG_MALI_MIDGARD=m
+KBUILD_OPTIONS += CONFIG_MALI_PLATFORM_NAME="hisilicon"
+KBUILD_OPTIONS += CONFIG_MALI_EXPERT=y
+KBUILD_OPTIONS += CONFIG_MALI_PWRSOFT_765=y
+KBUILD_OPTIONS += CONFIG_MALI_DEVFREQ=y
+KBUILD_OPTIONS += CONFIG_DEVFREQ_THERMAL=y
+KBUILD_OPTIONS += $(KBUILD_EXTRA) # Extra config if any
 
 ifeq ($(MALI_UNIT_TEST), 1)
 	EXTRA_SYMBOLS += $(KBASE_PATH_RELATIVE)/tests/internal/src/kernel_assert_module/linux/Module.symvers
@@ -38,7 +47,10 @@ endif
 
 # we get the symbols from modules using KBUILD_EXTRA_SYMBOLS to prevent warnings about unknown functions
 all:
-	$(MAKE) -C $(KDIR) M=$(CURDIR) EXTRA_CFLAGS="-I$(CURDIR)/../../../../include -I$(CURDIR)/../../../../tests/include $(SCONS_CFLAGS)" $(SCONS_CONFIGS) KBUILD_EXTRA_SYMBOLS="$(EXTRA_SYMBOLS)" modules
+	$(MAKE) -C $(KERNEL_SRC) M=$(CURDIR) EXTRA_CFLAGS="-I$(CURDIR) -I$(CURDIR)/../../../../include -I$(CURDIR)/../../../../tests/include $(SCONS_CFLAGS)" $(SCONS_CONFIGS) KBUILD_EXTRA_SYMBOLS="$(EXTRA_SYMBOLS)" modules $(KBUILD_OPTIONS)
+
+modules_install:
+	$(MAKE) -C $(KERNEL_SRC) M=$(CURDIR) modules_install
 
 clean:
-	$(MAKE) -C $(KDIR) M=$(CURDIR) clean
+	$(MAKE) -C $(KERNEL_SRC) M=$(CURDIR) clean
